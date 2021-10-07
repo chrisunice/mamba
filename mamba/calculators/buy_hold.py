@@ -33,11 +33,13 @@ class BuyHoldCalculator:
         assert interest_rate < 1
 
         # Handle input params
+        self.price = 1
         self.rent = market_rent
         self.profit = (desired_profit * self.rent if desired_profit < 1 else desired_profit)
         self.apr = interest_rate
         self.term = loan_term
-        # self.dp = ()
+        self.dp = (down_payment * self.price if down_payment < 1 else down_payment)
+
 
 
 

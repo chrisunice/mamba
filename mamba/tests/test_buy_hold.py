@@ -1,0 +1,14 @@
+from mamba.calculator.buy_hold import BuyHold
+
+
+def test_buy_hold_calculator():
+    calc = BuyHold(
+        market_rent=3381,
+        desired_profit=100,
+        interest_rate=0.04,
+        hoa=(173/3),
+        property_tax=0.0091
+    )
+    calc.summary()
+    assert True
+

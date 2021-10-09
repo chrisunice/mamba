@@ -1,3 +1,5 @@
 ipython
 pandas
 numpy
+numpy-financial
+scipy

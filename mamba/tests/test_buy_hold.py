@@ -11,5 +11,5 @@ def test_buy_hold_calculator():
         insurance=1170.23
     )
     calc.summary()
-    assert True
+    assert isinstance(calc.purchase_price, float)
 

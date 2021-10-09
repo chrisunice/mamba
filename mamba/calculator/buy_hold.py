@@ -1,7 +1,5 @@
-import inspect
 import numpy as np
 from typing import Union
-from pprint import pprint
 import numpy_financial as npf
 from scipy.optimize import minimize_scalar
 
@@ -20,7 +18,7 @@ class BuyHold:
                  vacancy_rate: float = 0.05,
                  capex_rate: float = 0.05):
         """
-        TODO add description
+        Calculator to determine the purchase price of a property using the traditional buy and hold method
 
         :param market_rent: fair market monthly rent for the property
         :param desired_profit: monthly profit expressed as a dollar amount or percentage of rent
@@ -42,13 +40,20 @@ class BuyHold:
         self.hoa = hoa
         self.loan_term = loan_term
         self.interest_rate = interest_rate
+
+        # Rent dependent attributes
         self.capex = (capex_rate * self.rent if capex_rate < 1 else capex_rate)
         self.vacancy = (vacancy_rate * self.rent if vacancy_rate < 1 else vacancy_rate)
         self.property_mgt = (property_mgt * self.rent if property_mgt < 1 else property_mgt)
         self.profit = (desired_profit * self.rent if desired_profit < 1 else desired_profit)
 
         # Find optimal solution
-        solution = minimize_scalar(self._objective, args=(down_payment, property_tax, insurance))
+        solution = minimize_scalar(
+            self._objective,
+            bounds=(0, 1e9),
+            method='bounded',
+            args=(down_payment, property_tax, insurance)
+        )
 
         # Calculate resultant values
         self.purchase_price = float(solution.x)
@@ -59,30 +64,27 @@ class BuyHold:
         self.insurance = (self.purchase_price * insurance if insurance < 1 else insurance)
         self.mortgage = self.principle_interest + self.tax/12 + self.insurance/12
 
-        self._formatter()
-
     def summary(self):
-        summary = {
-                'purchase_price': self.purchase_price,
-                'market_rent': self.rent,
-                'mortgage': {
-                    'total': self.mortgage,
-                    'principle_interest': {
-                        'total': self.principle_interest,
-                        'interest_rate': self.interest_rate,
-                        'loan_term': self.loan_term,
-                        'loan_amount': self.loan_amount,
-                    },
-                    'real_estate_tax': self.tax/12,
-                    'hazard_insurance': self.insurance/12,
-                },
-                'home_owners_association': self.hoa,
-                'property_management': self.property_mgt,
-                'capex_allowance': self.capex,
-                'vacancy_allowance': self.vacancy,
-                'profit': self.profit
-            }
-        pprint(summary)
+        spacing = ' '*30
+        summary = f"\n\t{'Purchase Price:'+spacing:.30s}$ {self.purchase_price:,.2f}" \
+                  f"\n\t{'Down Payment:'+spacing:.30s}$ {self.down_payment:,.2f}" \
+                  f"\n\t{'Market Rent:'+spacing:.30s}$ {self.rent:,.2f}" \
+                  f"\n" \
+                  f"\n\t{'Mortgage:'+spacing:.30s}$ {self.mortgage:,.2f}" \
+                  f"\n\t{'  Principle & Interest:'+spacing:.30s}$ {self.principle_interest:,.2f}" \
+                  f"\n\t{'    Interest Rate:'+spacing:.30s} {self.interest_rate*100:.2f}%" \
+                  f"\n\t{'    Loan Term:'+spacing:.30s} {self.loan_term:.0f}" \
+                  f"\n\t{'    Loan Amount:'+spacing:.30s}$ {self.loan_amount:,.2f}" \
+                  f"\n\t{'  Real Estate Tax:'+spacing:.30s}$ {self.tax/12:,.2f}" \
+                  f"\n\t{'  Hazard Insurance:'+spacing:.30s}$ {self.insurance/12:,.2f}" \
+                  f"\n" \
+                  f"\n\t{'HOA:'+spacing:.30s}$ {self.hoa:,.2f}" \
+                  f"\n\t{'Property Management:'+spacing:.30s}$ {self.property_mgt:,.2f}" \
+                  f"\n\t{'Capital Expenditures:'+spacing:.30s}$ {self.capex:,.2f}" \
+                  f"\n\t{'Vacancy:'+spacing:.30s}$ {self.vacancy:,.2f}" \
+                  f"\n" \
+                  f"\n\t{'Profit:'+spacing:.30s}$ {self.profit:,.2f}"
+        print(summary)
 
     def _objective(self, purchase_price: np.ndarray, down_payment, property_tax, insurance) -> float:
         # Principle and interest
@@ -94,14 +96,6 @@ class BuyHold:
         ins = (insurance * purchase_price if insurance < 1 else insurance)
         mortgage = pi + tax/12 + ins/12
 
-        expenses = mortgage + self.capex + self.vacancy + self.property_mgt + self.profit
+        expenses = mortgage + self.hoa + self.capex + self.vacancy + self.property_mgt + self.profit
         difference = self.rent - expenses
         return abs(difference)
-
-    def _formatter(self):
-        for attr_name, attr_value in inspect.getmembers(self):
-            if not attr_name.startswith('_'):
-                try:
-                    setattr(self, attr_name, round(attr_value, 2))
-                except TypeError:
-                    continue

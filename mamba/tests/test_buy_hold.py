@@ -7,7 +7,8 @@ def test_buy_hold_calculator():
         desired_profit=100,
         interest_rate=0.04,
         hoa=(173/3),
-        property_tax=0.0091
+        property_tax=3776.54,
+        insurance=1170.23
     )
     calc.summary()
     assert True

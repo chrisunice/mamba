@@ -2,7 +2,27 @@ from .buy_hold import BuyHold
 
 
 class BRRRR(BuyHold):
-    def __init__(self, arv: int, rehab: int, recap_rate: float, refi_ltv: float = 0.80, **kwargs):
+    def __init__(self, arv: int, rehab: int, recap_rate: float = 1, refi_ltv: float = 0.80, **kwargs):
+        """
+        Calculator to determine the purchase price of a property using the BRRRR method
+
+        :param arv: after repair value of the property
+        :param rehab: cost to repair the property
+        :param recap_rate: percentage of capital to recover from the refinance; default is 1 (100%)
+        :param refi_ltv: percentage of the `arv` that a bank will refinance; default is 0.80 (80%)
+        :param kwargs: parameters to pass to parent class
+            - market_rent
+            - desired_profit
+            - interest_rate
+            - loan_term
+            - down_payment
+            - property_tax
+            - insurance
+            - property_mgt
+            - hoa
+            - vacancy_rate
+            - capex_rate
+        """
         super().__init__(**kwargs)
 
         # Handle input params

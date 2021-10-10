@@ -3,8 +3,10 @@ from typing import Union
 import numpy_financial as npf
 from scipy.optimize import minimize_scalar
 
+from . import BaseCalculator
 
-class BuyHold:
+
+class BuyHold(BaseCalculator):
     def __init__(self,
                  market_rent: int,
                  desired_profit: Union[int, float],
@@ -32,6 +34,9 @@ class BuyHold:
         :param vacancy_rate: either monthly amount or a percentage of the rent; default is 5%
         :param capex_rate: either a monthly amount or a percentage of the rent; default is 5%
         """
+        super(BuyHold, self).__init__()
+        super().__init__()
+
         # Error trapping
         assert interest_rate < 1
 
@@ -63,28 +68,12 @@ class BuyHold:
         self.tax = (self.purchase_price * property_tax if property_tax < 1 else property_tax)
         self.insurance = (self.purchase_price * insurance if insurance < 1 else insurance)
         self.mortgage = self.principle_interest + self.tax/12 + self.insurance/12
+        self.cocr = self.get_cash_on_cash_roi(self.profit, self.down_payment)
 
     def summary(self):
-        spacing = ' '*30
-        summary = f"\n\t{'Purchase Price:'+spacing:.30s}$ {self.purchase_price:,.2f}" \
-                  f"\n\t{'Down Payment:'+spacing:.30s}$ {self.down_payment:,.2f}" \
-                  f"\n\t{'Market Rent:'+spacing:.30s}$ {self.rent:,.2f}" \
-                  f"\n" \
-                  f"\n\t{'Mortgage:'+spacing:.30s}$ {self.mortgage:,.2f}" \
-                  f"\n\t{'  Principle & Interest:'+spacing:.30s}$ {self.principle_interest:,.2f}" \
-                  f"\n\t{'    Interest Rate:'+spacing:.30s} {self.interest_rate*100:.2f}%" \
-                  f"\n\t{'    Loan Term:'+spacing:.30s} {self.loan_term:.0f}" \
-                  f"\n\t{'    Loan Amount:'+spacing:.30s}$ {self.loan_amount:,.2f}" \
-                  f"\n\t{'  Real Estate Tax:'+spacing:.30s}$ {self.tax/12:,.2f}" \
-                  f"\n\t{'  Hazard Insurance:'+spacing:.30s}$ {self.insurance/12:,.2f}" \
-                  f"\n" \
-                  f"\n\t{'HOA:'+spacing:.30s}$ {self.hoa:,.2f}" \
-                  f"\n\t{'Property Management:'+spacing:.30s}$ {self.property_mgt:,.2f}" \
-                  f"\n\t{'Capital Expenditures:'+spacing:.30s}$ {self.capex:,.2f}" \
-                  f"\n\t{'Vacancy:'+spacing:.30s}$ {self.vacancy:,.2f}" \
-                  f"\n" \
-                  f"\n\t{'Profit:'+spacing:.30s}$ {self.profit:,.2f}"
-        print(summary)
+        prefix = f"\n\tTraditional Buy and Hold" \
+                 f"\n\t{'-'*40}"
+        print(prefix + self._summary)
 
     def _objective(self, purchase_price: np.ndarray, down_payment, property_tax, insurance) -> float:
         # Principle and interest

@@ -5,7 +5,9 @@ import { FaBars } from "react-icons/fa";
 const useStyles = makeStyles({
   menuContainer: {
     display: 'flex',
-    alignItems: 'top',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
     backgroundColor: '#29b6f6ff',
   },
   menuBars: {
@@ -21,6 +23,7 @@ const MenuBar = () => {
   return (
     <div className={classes.menuContainer}>
       <FaBars className={classes.menuBars} />
+      <h3>Traditional Purchase Calculator</h3>
       {/*<FaBars className={classes.menuBars} onClick={showSidebar}/>*/}
     </div>
   );

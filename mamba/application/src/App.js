@@ -1,12 +1,12 @@
 import './App.css';
 import MenuBar from "./components/MenuBar";
-import Form from "./components/Form";
+import PropertyForm from "./components/PropertyForm/PropertyForm";
 
 function App() {
   return (
     <div className="App">
         <MenuBar/>
-        <Form/>
+        <PropertyForm/>
     </div>
   );
 }
